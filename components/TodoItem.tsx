@@ -35,7 +35,7 @@ export function TodoItem(props) {
       </li>
       <button
         onClick={handleDeleteClick}
-        style={{ color: "hsl(0deg 100% 65%)" }}
+        style={{ color: "hsl(0deg 100% 75%)" }}
       >
         Delete
       </button>
