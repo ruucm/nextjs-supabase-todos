@@ -3,25 +3,51 @@ import { useEffect, useState } from "react";
 import { TodoItem } from "../components/TodoItem";
 
 function Page() {
-  const [todos, updateTodo, deleteTodo] = useSubscribeTable("todos");
+  const [todos, insertRow, updateRow, deleteRow] = useDbTable("todos");
 
   return (
-    <ul style={{ listStyle: "none", padding: 20 }}>
-      {todos?.map((todo) => (
-        <TodoItem
-          key={todo.id}
-          todo={todo}
-          updateTodo={updateTodo}
-          deleteTodo={deleteTodo}
-        />
-      ))}
-    </ul>
+    <div style={{ padding: 20 }}>
+      <AddItem insertRow={insertRow} />
+      <br />
+      <ul style={{ listStyle: "none" }}>
+        {todos?.map((todo) => (
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            updateRow={updateRow}
+            deleteRow={deleteRow}
+          />
+        ))}
+      </ul>
+    </div>
   );
 }
 
 export default Page;
 
-function useSubscribeTable(table) {
+function AddItem({ insertRow }) {
+  const [value, setValue] = useState("");
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        console.log("value", value);
+        insertRow({ title: value });
+        setValue("");
+      }}
+      style={{ display: "flex", gap: 12 }}
+    >
+      <input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        style={{ border: "0.5px solid" }}
+      />
+      <button type="submit">submit</button>
+    </form>
+  );
+}
+
+function useDbTable(table) {
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
@@ -72,7 +98,7 @@ function useSubscribeTable(table) {
     };
   }, []);
 
-  async function updateTodo(updates) {
+  async function updateRow(updates) {
     const { id, done } = updates;
     const { error, ...data } = await supabase
       .from(table)
@@ -86,11 +112,20 @@ function useSubscribeTable(table) {
     }
   }
 
-  function deleteTodo(id) {
+  async function deleteRow(id) {
+    const { error, ...data } = await supabase.from(table).delete().eq("id", id);
+
+    if (error) {
+      console.log("error", error);
+    } else {
+      console.log("data", data);
+    }
+  }
+
+  function insertRow(item) {
     supabase
       .from(table)
-      .delete()
-      .match({ id })
+      .insert(item)
       .then(({ data, error }) => {
         if (error) {
           console.log("error", error);
@@ -100,5 +135,5 @@ function useSubscribeTable(table) {
       });
   }
 
-  return [rows, updateTodo, deleteTodo] as any;
+  return [rows, insertRow, updateRow, deleteRow] as any;
 }
