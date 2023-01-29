@@ -66,16 +66,6 @@ export function useDBTable(table) {
     }
   }
 
-  async function deleteRow(id) {
-    const { error, ...data } = await supabase.from(table).delete().eq("id", id);
-
-    if (error) {
-      console.log("error", error);
-    } else {
-      console.log("data", data);
-    }
-  }
-
   function insertRow(item) {
     supabase
       .from(table)
@@ -87,6 +77,16 @@ export function useDBTable(table) {
           console.log("data", data);
         }
       });
+  }
+
+  async function deleteRow(id) {
+    const { error, ...data } = await supabase.from(table).delete().eq("id", id);
+
+    if (error) {
+      console.log("error", error);
+    } else {
+      console.log("data", data);
+    }
   }
 
   return [rows, insertRow, updateRow, deleteRow] as any;
